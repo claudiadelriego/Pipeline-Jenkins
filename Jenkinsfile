@@ -15,8 +15,7 @@ pipeline {
         }
 
 
-        stages {
-                stage('Test') {
+            stage('Test') {
                     steps {
                         /* `make check` returns non-zero on test failures,
                         * using `true` to allow the Pipeline to continue nonetheless
@@ -25,12 +24,11 @@ pipeline {
                         junit '**/target/*.xml'
                     }
                 }
-         }
 
 
 
-        stages {
-                stage('Deploy') {
+
+           stage('Deploy') {
                     when {
                       expression {
                         currentBuild.result == null || currentBuild.result == 'SUCCESS'
@@ -40,6 +38,6 @@ pipeline {
                         sh 'make publish'
                     }
                 }
-            }
-    }
+        }
+
 
