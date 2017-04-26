@@ -7,8 +7,8 @@ pipeline {
 
     stages {
             stage('Build') {
-            checkout scm
-                steps {
+            eps {
+                    checkout scm
                     sh 'make'
                    stash includes: '**/target/*.jar', name: 'app'
                 }
