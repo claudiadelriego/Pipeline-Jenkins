@@ -3,48 +3,13 @@
 
 
 pipeline {
-    agent any
-
+    agent { docker 'maven:3-alpine' }
     stages {
-            stage('Build') {
+        stage('Example Build') {
             steps {
-                    checkout scm
-                    sh 'make'
-                   stash includes: '**/target/*.jar', name: 'app'
-                }
-            }
-
-
-           stage('Test on Linux') {
-                       agent {
-                           label 'linux'
-                       }
-                       steps {
-                           unstash 'app'
-                           sh 'make check'
-                       }
-                       post {
-                           always {
-                               junit '**/target/*.xml'
-                           }
-                       }
-                   }
-                   stage('Test on Windows') {
-                       agent {
-                           label 'windows'
-                       }
-                       steps {
-                           unstash 'app'
-                           bat 'make check'
-                       }
-                       post {
-                           always {
-                               junit '**/target/*.xml'
-                           }
-                       }
-                   }
-
+                sh 'mvn -B clean verify'
             }
         }
-
+    }
+}
 
