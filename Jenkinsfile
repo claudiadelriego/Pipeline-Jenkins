@@ -7,37 +7,42 @@ pipeline {
 
     stages {
             stage('Build') {
+            checkout scm
                 steps {
                     sh 'make'
-                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+                   stash includes: '**/target/*.jar', name: 'app'
                 }
             }
 
 
-            stage('Test') {
-                    steps {
-                        /* `make check` returns non-zero on test failures,
-                        * using `true` to allow the Pipeline to continue nonetheless
-                        */
-                        sh 'make check || true'
-                        junit '**/target/*.xml'
-                    }
-                }
-
-
-
-
-           stage('Deploy') {
-                    when {
-                      expression {
-                        currentBuild.result == null || currentBuild.result == 'SUCCESS'
-                      }
-                    }
-                    steps {
-                        sh 'make publish'
-                    }
-
+           stage('Test on Linux') {
+                       agent {
+                           label 'linux'
+                       }
+                       steps {
+                           unstash 'app'
+                           sh 'make check'
+                       }
+                       post {
+                           always {
+                               junit '**/target/*.xml'
                            }
+                       }
+                   }
+                   stage('Test on Windows') {
+                       agent {
+                           label 'windows'
+                       }
+                       steps {
+                           unstash 'app'
+                           bat 'make check'
+                       }
+                       post {
+                           always {
+                               junit '**/target/*.xml'
+                           }
+                       }
+                   }
 
             }
         }
